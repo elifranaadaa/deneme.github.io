@@ -628,22 +628,7 @@ function updateListPosition() {
   const viewport = listEl.parentElement; // .urunler-list-col
   if (!viewport) return;
 
-  const isMobile = window.matchMedia('(max-width: 992px)').matches;
-
-  if (isMobile) {
-    // 📱 Mobil/Tablet: transform kullanma, doğal kaydırma
-    listEl.style.transform = '';
-    listEl.style.removeProperty('--slot-pad-top');
-    listEl.style.removeProperty('--slot-pad-bottom');
-
-    const active = items[current];
-    if (active && typeof active.scrollIntoView === 'function') {
-      active.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
-    }
-    return;
-  }
-
-  // 💻 Masaüstü hizalama
+  // Sabit slot (px)
   const slot = parseFloat(getComputedStyle(viewport).getPropertyValue('--active-slot'))
                || Math.round(viewport.clientHeight * 0.35);
 
@@ -652,19 +637,22 @@ function updateListPosition() {
 
   const viewportH = viewport.clientHeight;
 
-  // Görünmez tamponlar: en üst/alt ürün de slot çizgisine otursun
-  const padTop = slot;
-  const padBottom = Math.max(0, viewportH - slot);
+  // Üst/alt görünmez tamponlar: son/ilk ürün de slot çizgisine gelebilsin
+  const padTop = slot;                       // aktif öğe tepeye yaklaşırken pay
+  const padBottom = Math.max(0, viewportH - slot); // altta pay (son ürün için kritik)
 
+  // CSS değişkenleri olarak uygula
   listEl.style.setProperty('--slot-pad-top', padTop + 'px');
   listEl.style.setProperty('--slot-pad-bottom', padBottom + 'px');
 
+  // Artık scrollHeight tamponları da içeriyor
   const listH = listEl.scrollHeight;
 
-  const activeTop = activeItem.offsetTop;
+  // Aktif öğenin tepesini sabit slot'a getir
+  const activeTop = activeItem.offsetTop; // padTop dahil olarak ölçülür
   let y = slot - activeTop;
 
-  // Taşmayı engelle
+  // Listeyi görünüm dışına taşırma (kenarlarda boşluk bırakma)
   const maxY = 0;
   const minY = Math.min(0, viewportH - listH);
   if (y > maxY) y = maxY;
@@ -672,11 +660,6 @@ function updateListPosition() {
 
   listEl.style.transform = `translateY(${Math.round(y)}px)`;
 }
-
-// 🪄 Ekran boyutu değişince aktif ürünü yeniden hizala
-window.addEventListener('resize', () => {
-  updateListPosition();
-});
 
 
 
@@ -1207,4 +1190,5 @@ document.addEventListener('DOMContentLoaded', function() {
     current = initIdx; 
   }
 });
+
 
