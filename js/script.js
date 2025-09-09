@@ -152,13 +152,18 @@ if (totalSlides > 0) {
 }
 
 /* ===== 4. PRELOADER ===== */
+// script.js -> PRELOADER bölümünde
 window.addEventListener("load", () => {
   const preloader = document.getElementById("preloader");
   if (preloader) {
     preloader.classList.add("hidden");
-    setTimeout(() => preloader.remove(), 800); // Tamamen DOM'dan sil
+    setTimeout(() => {
+      preloader.remove();
+      window.scrollTo(0, 0); // Yüklenince sayfayı en üste sabitle
+    }, 800);
   }
 });
+
 
 /* ===== 5. SCROLL INDICATOR ===== */
 const scrollInd = document.querySelector('.scroll-indicator');
@@ -1187,4 +1192,5 @@ document.addEventListener('DOMContentLoaded', function() {
     setActiveThumb(initIdx); 
     current = initIdx; 
   }
+
 });
