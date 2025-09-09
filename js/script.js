@@ -152,18 +152,13 @@ if (totalSlides > 0) {
 }
 
 /* ===== 4. PRELOADER ===== */
-// script.js -> PRELOADER bölümünde
 window.addEventListener("load", () => {
   const preloader = document.getElementById("preloader");
   if (preloader) {
     preloader.classList.add("hidden");
-    setTimeout(() => {
-      preloader.remove();
-      window.scrollTo(0, 0); // Yüklenince sayfayı en üste sabitle
-    }, 800);
+    setTimeout(() => preloader.remove(), 800); // Tamamen DOM'dan sil
   }
 });
-
 
 /* ===== 5. SCROLL INDICATOR ===== */
 const scrollInd = document.querySelector('.scroll-indicator');
@@ -588,9 +583,11 @@ if (statNumbers.length) {
 
     /* === AUTOPLAY AYARLARI === */
     const intervalFromAttr = Number(imagesEl.dataset.interval || listEl.dataset.interval || 0) || undefined;
-    const AUTO_PLAY = options.auto !== false; // default: true
-    const AUTO_INT = Number(options.interval || intervalFromAttr || 5000); // ms
-    let autoTimer = null;
+// Mobil/Tablet (<=1024px) ise autoplay kapalı
+const isSmallScreen = window.matchMedia('(max-width:1024px)').matches;
+let AUTO_PLAY = !isSmallScreen && (options.auto !== false);
+const AUTO_INT = Number(options.interval || intervalFromAttr || 5000);
+let autoTimer = null;
 
     function startAuto() {
       if (!AUTO_PLAY) return;
@@ -609,6 +606,15 @@ if (statNumbers.length) {
       stopAuto(); 
       startAuto();
     }
+
+    function handleResizeAutoplay() {
+  const small = window.matchMedia('(max-width:1024px)').matches;
+  AUTO_PLAY = !small && (options.auto !== false);
+  if (AUTO_PLAY) startAuto();
+  else stopAuto();
+}
+window.addEventListener('resize', handleResizeAutoplay);
+
 
     /* === LİSTEYİ ORTAYA HİZALA === */
 
@@ -723,9 +729,12 @@ function setActive(i, fromAuto = false) {
     });
 
     // Başlat
-    setActive(current);
-    startAuto && startAuto();
-    window.addEventListener('resize', updateListPosition);
+// Başlat
+setActive(current);
+if (AUTO_PLAY) startAuto();
+window.addEventListener('resize', updateListPosition);
+handleResizeAutoplay(); // sayfa yüklenir yüklenmez doğru moda geç
+
   }
 
   // Carousel'leri başlat
@@ -1192,5 +1201,4 @@ document.addEventListener('DOMContentLoaded', function() {
     setActiveThumb(initIdx); 
     current = initIdx; 
   }
-
 });
